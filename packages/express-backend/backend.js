@@ -1,7 +1,11 @@
 import express from "express";
+import cors from "cors";
 
 const app = express();
 const port = 8000;
+
+app.use(cors());
+app.use(express.json());
 
 const users = {
     users_list: [
@@ -33,7 +37,6 @@ const users = {
     ]
   };
 
-app.use(express.json());
 
 app.get("/", (req, res) => {
     res.send("Hello World!");
@@ -65,9 +68,14 @@ const findUserByNameAndJob = (name, job) => {
 
 const findUserById = (id) => users["users_list"].find((user) => user["id"] === id);
 
+const generateRandomId = () => {
+  return Math.random().toString(36).substring(2, 10); 
+};
+
 const addUser = (user) => {
-    users["users_list"].push(user);
-    return user;
+  const newUser = { ...user, id: generateRandomId() };
+  users["users_list"].push(newUser); 
+  return newUser; 
 };
 
 // Find users by name or job
@@ -103,26 +111,25 @@ app.get("/users/:id", (req, res) => {
   }
 });
 
-// Add users
 app.post("/users", (req, res) => {
-    const userToAdd = req.body;
-    addUser(userToAdd);
-    res.send();
+  const userToAdd = req.body;
+  const newUser = addUser(userToAdd);
+  res.status(201).json(newUser).send(); 
 });
 
-// Delete users
+// Delete users by ID
 app.delete("/users/:id", (req, res) => {
-    const id = req.params.id;
-    const index = users.users_list.findIndex((user) => user.id === id);
-    if (index !== -1) {
-        // Remove the user from the list
-        users.users_list.splice(index, 1);
-        // Send a success response
-        res.status(200).send(`User with id ${id} has been deleted successfully.`);
-    } else {
-        // User not found
-        res.status(404).send("Resource not found.");
-    }
+  const id = req.params.id;
+  const index = users.users_list.findIndex((user) => user.id === id);
+  if (index !== -1) {
+      // Remove the user from the list
+      users.users_list.splice(index, 1);
+      // Send a success response with status code 204 
+      res.status(204).send(`User with id ${id} has been deleted successfully.`);
+  } else {
+      // User not found, send status code 404 
+      res.status(404).send("Resource not found.");
+  }
 });
 
 
