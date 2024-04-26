@@ -19,7 +19,7 @@ function getUsers(name, job) {
   } else if (job && !name) {
     promise = findUserByJob(job);
   } else if (job && name) {
-    promise = findUserByJobAndName(job, name)
+    promise = findUserByJobAndName(job, name);
   }
   return promise;
 }
@@ -32,6 +32,10 @@ function addUser(user) {
   const userToAdd = new userModel(user);
   const promise = userToAdd.save();
   return promise;
+}
+
+function findUserByJobAndName(job, name) {
+  return userModel.find({ job, name: job, name})
 }
 
 function findUserByName(name) {
